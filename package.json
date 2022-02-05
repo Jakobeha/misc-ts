@@ -1,0 +1,49 @@
+{
+  "name": "@raycenity/misc-ts",
+  "version": "0.1.0",
+  "description": "miscellaneous typescript and javascript utilities",
+  "type": "module",
+  "module": "out/src/index.js",
+  "types": "out/types/index.d.ts",
+  "scripts": {
+    "typegen": "tsc",
+    "typegen-watch": "tsc --watch",
+    "codegen": "node esbuild.cjs",
+    "codegen-watch": "node esbuild.cjs --watch",
+    "build": "run-s typegen codegen",
+    "watch": "run-p typegen-watch codegen-watch",
+    "lint": "node ts-standardx.mjs",
+    "lint-fix": "node ts-standardx.mjs --fix",
+    "real-test": "echo 'No tests yet'",
+    "test": "run-s lint real-test",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jakobeha/misc-ts.git"
+  },
+  "keywords": [
+    "misc",
+    "utils"
+  ],
+  "author": "jakobeha@fastmail.com",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/Jakobeha/misc-ts/issues"
+  },
+  "homepage": "https://github.com/Jakobeha/misc-ts#readme",
+  "devDependencies": {
+    "@types/node": "^17.0.8",
+    "@typescript-eslint/parser": "^4.0.0",
+    "colorette": "^2.0.16",
+    "esbuild": "^0.14.9",
+    "eslint": "^5.0.0 || ^6.0.0 || ^7.0.0",
+    "husky": "^7.0.4",
+    "npm-run-all": "^4.1.5",
+    "ts-standard": "^11.0.0",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "string-width": "^5.1.0"
+  }
+}
