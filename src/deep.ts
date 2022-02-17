@@ -96,16 +96,50 @@ export function deepCopy <T> (value: T, copyMap: Map<any, any> = new Map<any, an
     } else if (/* assumes frozen values are deep-frozen */ Object.isFrozen(value)) {
       return value
     } else if (Array.isArray(value)) {
-      const copy = value.map((elem, i) => deepCopy(elem, copyMap, `${debugPath}[${i}]`)) as any
+      const copy: any[] = []
       copyMap.set(value, copy)
-      return copy
+      value.forEach((elem, i) => {
+        copy.push(deepCopy(elem, copyMap, `${debugPath}[${i}]`))
+      })
+      return copy as unknown as T
     } else {
       const copy: Partial<T> = {}
+      copyMap.set(value, copy)
       for (const key in value) {
         copy[key] = deepCopy(value[key], copyMap, `${debugPath}.${key}`)
       }
-      copyMap.set(value, copy)
       return copy as T
+    }
+  } else {
+    return value
+  }
+}
+
+export function deepHash (value: any, refMap: Map<any, number> = new Map<any, number>(), debugPath = ''): string {
+  if (typeof value === 'object') {
+    if (value instanceof BackRef) {
+      const refNumber = refMap.get(value.get())
+      if (refNumber !== undefined) {
+        refMap.set(value, refNumber)
+        return `REF#${refNumber}`
+      } else {
+        // References something outside the copy
+        return 'REF?'
+      }
+    } else if (Array.isArray(value)) {
+      refMap.set(value, refMap.size)
+      return `[${value.map((elem, i) => deepHash(elem, refMap, `${debugPath}[${i}]`)).join(',')}]`
+    } else {
+      refMap.set(value, refMap.size)
+      let hash: string = '{'
+      for (const key in value) {
+        if (hash.length > 1) {
+          hash += ','
+        }
+        hash += `"${key}":${deepHash(value[key], refMap, `${debugPath}.${key}`)}`
+      }
+      hash += '}'
+      return hash
     }
   } else {
     return value

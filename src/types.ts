@@ -13,8 +13,18 @@ export type Logic = /* @__PURE__ */ (...args: any[]) => any
 
 export type NullToEmpty<T> = T extends null | undefined ? Empty : T
 
-export type FirstArgumentType<T extends (arg: any, ...rest: any) => any> =
+export type FirstParameter<T extends (arg: any, ...rest: any) => any> =
   T extends (arg: infer A, ...rest: any) => any ? A : never
+
+export type Single<T> =
+  T extends AsyncIterable<infer U> | Promise<Iterable<infer U>> ? Promise<Single<U> | null> :
+    T extends Iterable<infer U> ? Single<U> | null :
+      T
+
+export type UnPromise<T> =
+  T extends Promise<infer U> ? U : T
+
+export type Extends<T, U> = T extends U ? T : never
 
 export type ElemType<T extends any[]> = T extends Array<infer E> ? E : never
 

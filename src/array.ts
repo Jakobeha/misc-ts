@@ -50,4 +50,25 @@ export module Arrays {
       array.splice(index, 1)
     }
   }
+
+  export function findLastIndex<T> (array: T[], predicate: (element: T) => boolean, ifNotFound: number = -1): number {
+    for (let i = array.length - 1; i >= 0; i--) {
+      if (predicate(array[i])) {
+        return i
+      }
+    }
+    return ifNotFound
+  }
+
+  export function groupBy<V> (array: V[], group: (value: V) => string): Record<string, V[]> {
+    const result: Record<string, V[]> = {}
+    for (const value of array) {
+      const key = group(value)
+      if (result[key] == null) {
+        result[key] = []
+      }
+      result[key]!.push(value)
+    }
+    return result
+  }
 }

@@ -97,4 +97,14 @@ export module Strings {
     }
     return resultLines
   }
+
+  export function countLines (str: string, from: number = 0): number {
+    let count = 0
+    let i = from
+    while (i !== -1) {
+      count++
+      i = str.indexOf('\n', i)
+    }
+    return count
+  }
 }
