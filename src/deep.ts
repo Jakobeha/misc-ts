@@ -81,6 +81,9 @@ export function deepMerge<A, B> (a: A, b: B, debugPath = ''): A & B {
   }
 }
 
+export const DEEP_COPY_OVERRIDE: unique symbol = Symbol.for('deepCopyOverride')
+export const DEEP_HASH_OVERRIDE: unique symbol = Symbol.for('deepHashOverride')
+
 export function deepCopy <T> (value: T, copyMap: Map<any, any> = new Map<any, any>(), debugPath = ''): T {
   if (typeof value === 'object') {
     if (value instanceof BackRef) {
@@ -95,6 +98,11 @@ export function deepCopy <T> (value: T, copyMap: Map<any, any> = new Map<any, an
       }
     } else if (/* assumes frozen values are deep-frozen */ Object.isFrozen(value)) {
       return value
+    } else if (DEEP_COPY_OVERRIDE in value) {
+      // @ts-expect-error
+      const copy = value[DEEP_COPY_OVERRIDE](copyMap, debugPath)
+      copyMap.set(value, copy)
+      return copy
     } else if (Array.isArray(value)) {
       const copy: any[] = []
       copyMap.set(value, copy)
@@ -103,7 +111,7 @@ export function deepCopy <T> (value: T, copyMap: Map<any, any> = new Map<any, an
       })
       return copy as unknown as T
     } else {
-      const copy: Partial<T> = {}
+      const copy: Partial<T> = Object.create(Object.getPrototypeOf(value))
       copyMap.set(value, copy)
       for (const key in value) {
         copy[key] = deepCopy(value[key], copyMap, `${debugPath}.${key}`)
@@ -117,23 +125,35 @@ export function deepCopy <T> (value: T, copyMap: Map<any, any> = new Map<any, an
 
 export function deepHash (value: any, refMap: Map<any, number> = new Map<any, number>(), debugPath = ''): string {
   if (typeof value === 'object') {
-    if (value instanceof BackRef) {
-      const refNumber = refMap.get(value.get())
+    let refNumber = refMap.get(value)
+    if (refNumber !== undefined) {
+      return `REF#${refNumber}`
+    } else if (value instanceof BackRef) {
+      refNumber = refMap.get(value.get())
       if (refNumber !== undefined) {
         refMap.set(value, refNumber)
-        return `REF#${refNumber}`
+        return `BACKREF#${refNumber}`
       } else {
         // References something outside the copy
-        return 'REF?'
+        return 'BACKREF?'
       }
+    } else if (DEEP_HASH_OVERRIDE in value) {
+      refNumber = refMap.size
+      refMap.set(value, refNumber)
+      return `${refNumber}|${value[DEEP_HASH_OVERRIDE](refMap, debugPath) as string}`
     } else if (Array.isArray(value)) {
-      refMap.set(value, refMap.size)
-      return `[${value.map((elem, i) => deepHash(elem, refMap, `${debugPath}[${i}]`)).join(',')}]`
+      refNumber = refMap.size
+      refMap.set(value, refNumber)
+      return `${refNumber}[${value.map((elem, i) => deepHash(elem, refMap, `${debugPath}[${i}]`)).join(',')}]`
     } else {
-      refMap.set(value, refMap.size)
-      let hash: string = '{'
+      refNumber = refMap.size
+      refMap.set(value, refNumber)
+      let hash: string = `${refNumber}{`
+      let isFirst = true
       for (const key in value) {
-        if (hash.length > 1) {
+        if (isFirst) {
+          isFirst = false
+        } else {
           hash += ','
         }
         hash += `"${key}":${deepHash(value[key], refMap, `${debugPath}.${key}`)}`

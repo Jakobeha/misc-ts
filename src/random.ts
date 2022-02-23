@@ -1,3 +1,5 @@
+import { DEEP_COPY_OVERRIDE } from 'deep'
+
 // From https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
 function xmur3 (str: string): () => number {
   let i, h: number
@@ -35,6 +37,8 @@ export interface Random {
   copy: () => Random
   /** Advance the state and return a completely different random seeded on the current state */
   branch: () => Random
+  /** Equivalent to `copy` */
+  [DEEP_COPY_OVERRIDE]: () => Random
 }
 
 export function rand (seed: string = Date.now().toString()): Random {
@@ -44,11 +48,8 @@ export function rand (seed: string = Date.now().toString()): Random {
 export function _rand (seed: number): Random {
   const { func, getA } = mulberry32(seed)
   return Object.assign(func, {
-    copy (): Random {
-      return _rand(getA())
-    },
-    branch (): Random {
-      return rand(`${seed}#${func()}`)
-    }
+    copy: (): Random => _rand(getA()),
+    branch: (): Random => rand(`${seed}#${func()}`),
+    [DEEP_COPY_OVERRIDE]: (): Random => _rand(getA())
   })
 }

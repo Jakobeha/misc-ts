@@ -1,4 +1,8 @@
 export module Record {
+  /**
+   * If TypeScript is complaining about `Partial` *don't* use this function, use `PartialRecord` instead.
+   * With this method, you can actually get an unchecked type error if one of the fields is `undefined` and your transformer isn't equipped to handle it.
+   */
   export function mapValues<K extends string | number | symbol, VI, VO> (record: Record<K, VI>, transform: (value: VI, key: K) => VO): Record<K, VO> {
     const result: Partial<Record<K, VO>> = {}
     for (const key in record) {
@@ -17,6 +21,18 @@ export module Record {
     await Promise.all(Object.keys(record).map(async (key) => {
       result[key as K] = await transform(record[key as K], key as K)
     }))
+    return result as Record<K, VO>
+  }
+}
+
+export module PartialRecord {
+  export function mapValues<K extends string | number | symbol, VI, VO> (record: Partial<Record<K, VI>>, transform: (value: VI, key: K) => VO): Partial<Record<K, VO>> {
+    const result: Partial<Record<K, VO>> = {}
+    for (const key in record) {
+      if (record[key] !== undefined) {
+        result[key] = transform(record[key]!, key)
+      }
+    }
     return result as Record<K, VO>
   }
 }

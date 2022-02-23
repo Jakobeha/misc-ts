@@ -71,4 +71,16 @@ export module Arrays {
     }
     return result
   }
+
+  export function padLeft<T> (array: T[], elem: T, newMinLength: number): void {
+    while (array.length < newMinLength) {
+      array.unshift(elem)
+    }
+  }
+
+  export function padRight<T> (array: T[], elem: T, newMinLength: number): void {
+    while (array.length < newMinLength) {
+      array.push(elem)
+    }
+  }
 }
