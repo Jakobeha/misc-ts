@@ -1,20 +1,19 @@
 import stringWidth from 'string-width'
+import { Regexps } from 'regexp'
 
 export module Strings {
-  // From https://github.com/chalk/ansi-regex/blob/main/index.js
-  function ansiRegex ({ onlyStart = false, global = false } = {}): RegExp {
-    const pattern = [
-      (onlyStart ? '^' : '') + '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
-      '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))'
-    ].join('|')
-
-    return new RegExp(pattern, global ? 'g' : '')
-  }
-  const ANSI_REGEX_ONLY_START = ansiRegex({ onlyStart: true })
-
   /** Returns the user-visible width of the string in monospace fonts */
   export function width (string: string): number {
     return stringWidth(string, { ambiguousIsNarrow: true })
+  }
+
+  /** If larger than width, remove characters from the end */
+  export function truncateEnd (string: string, width: number): string {
+    while (Strings.width(string) > width) {
+      string = string.slice(0, -1)
+    }
+
+    return string
   }
 
   export function substringSmart (string: string, start: number, width: number): string {
@@ -93,7 +92,7 @@ export module Strings {
         while (hasZeroWidthChars) {
           hasZeroWidthChars = false
           for (let i = 0; i < chars.length; i++) {
-            const ansiEscape = chars[i].match(ANSI_REGEX_ONLY_START)
+            const ansiEscape = chars[i].match(Regexps.ANSI_START)
             if (ansiEscape !== null) {
               // Count the entire ansi-escape as a zero-width
               resultLine += ansiEscape[0]
