@@ -54,6 +54,18 @@ export module Arrays {
     }
   }
 
+  export function equal<T> (lhs: T[], rhs: T[], compare?: (lhs: T, rhs: T) => boolean): boolean {
+    if (lhs.length !== rhs.length) {
+      return false
+    }
+    for (let i = 0; i < lhs.length; i++) {
+      if (compare === undefined ? lhs[i] === rhs[i] : compare(lhs[i], rhs[i])) {
+        return false
+      }
+    }
+    return true
+  }
+
   export function removeAllFrom<T> (array: T[], element: T): void {
     while (true) {
       const index = array.indexOf(element)
