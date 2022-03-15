@@ -40,6 +40,20 @@ export module Arrays {
     return result
   }
 
+  export function count<T> (array: T[], include?: (elem: T) => boolean): number {
+    if (include === undefined) {
+      return array.length
+    } else {
+      let count = 0
+      for (const elem of array) {
+        if (include(elem)) {
+          count++
+        }
+      }
+      return count
+    }
+  }
+
   export function removeAllFrom<T> (array: T[], element: T): void {
     while (true) {
       const index = array.indexOf(element)
