@@ -35,6 +35,14 @@ export module Record {
     await Promise.all(Object.keys(record).map((key) => action(key as K, record[key as K])))
   }
 
+  export async function mapValuesSequential<K extends string, VI, VO> (record: Record<K, VI>, transform: (value: VI, key: K) => Promise<VO>): Promise<Record<K, VO>> {
+    const result: Partial<Record<K, VO>> = {}
+    for (const key in record) {
+      result[key] = await transform(record[key], key)
+    }
+    return result as Record<K, VO>
+  }
+
   export async function mapValuesConcurrent<K extends string, VI, VO> (record: Record<K, VI>, transform: (value: VI, key: K) => Promise<VO>): Promise<Record<K, VO>> {
     const result: Partial<Record<K, VO>> = {}
     await Promise.all(Object.keys(record).map(async (key) => {
