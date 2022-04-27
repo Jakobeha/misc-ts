@@ -50,7 +50,9 @@ export module PartialRecord {
     for (const key in record) {
       const oldValue = record[key]
       if (oldValue !== undefined) {
-        result[key] = transform(oldValue, key)
+        // this assertion is necessary because TypeScript is dumb, or there's some weird JS quirk we miss
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        result[key] = transform(oldValue!, key)
       }
     }
     return result as Record<K, VO>
@@ -61,7 +63,9 @@ export module PartialRecord {
     for (const key in record) {
       const oldValue = record[key]
       if (oldValue !== undefined) {
-        const newValue = transform(oldValue, key)
+        // this assertion is necessary because TypeScript is dumb, or there's some weird JS quirk we miss
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const newValue = transform(oldValue!, key)
         if (newValue !== null && newValue !== undefined) {
           result[key] = newValue
         }
