@@ -1,4 +1,5 @@
 export * from 'array'
+export * from './assert'
 export * from 'collection'
 export * from 'deep'
 export * from 'generator'
