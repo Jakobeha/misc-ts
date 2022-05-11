@@ -21,6 +21,10 @@ export type DeepReadonly<T> = {
   readonly [K in keyof T]: DeepReadonly<T[K]>
 }
 
+export type DeepRequired<T> = {
+  [K in keyof T]-?: DeepRequired<T[K]>
+}
+
 export type NullToEmpty<T> = T extends null | undefined ? Empty : T
 
 export type FirstParameter<T extends (arg: any, ...rest: any) => any> =
