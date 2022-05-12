@@ -67,6 +67,21 @@ export module Strings {
     return base
   }
 
+  /**
+   * Adds extra `padding` characters between `start` and `end` to pad to at least `width`.
+   * Takes into account the real string monospace width, AKA multi-width characters and ANSI escape codes.
+   */
+  export function padCenterSmart (start: string, end: string, width: number, padding: string = ' '): string {
+    let baseWidth = Strings.width(start) + Strings.width(end)
+    const paddingWidth = Strings.width(padding)
+    while (baseWidth < width) {
+      start += padding
+      baseWidth += paddingWidth
+    }
+    start += end
+    return start
+  }
+
   export function uncapitalize<S extends string> (string: S): Uncapitalize<S> {
     return string.charAt(0).toLowerCase() + string.slice(1) as Uncapitalize<S>
   }

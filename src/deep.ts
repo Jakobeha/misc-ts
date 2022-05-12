@@ -43,6 +43,48 @@ export function equals (a: any, b: any): boolean {
   }
 }
 
+/** Assigns child objects. To merge functions, applies both of them and then deep assigns the result.
+ * This *does* mutate `a` and `a`'s children, including returned values from functions.
+ */
+export function deepAssign<A, B> (a: A, b: B, debugPath = ''): A & B {
+  if ((a as any) === (b as any)) {
+    return a as A & B
+  } else if (typeof a === 'object' && typeof b === 'object') {
+    for (const key in b) {
+      if (key in a) {
+        // @ts-expect-error
+        a[key] = deepAssign(a[key], b[key], `${debugPath}.${key}`)
+      } else {
+        // @ts-expect-error
+        a[key] = b[key]
+      }
+    }
+    return a as A & B
+  } else if (typeof a === 'function' && typeof b === 'function') {
+    return ((...args: any[]) => {
+      return deepAssign(a(...args), b(...args), `${debugPath}(...)`)
+    }) as unknown as A & B
+  } else if (typeof a === 'function' && typeof b === 'object') {
+    return ((...args: any[]) => {
+      return deepAssign(a(...args), b, `${debugPath}(...)`)
+    }) as unknown as A & B
+  } else if (typeof a === 'object' && typeof b === 'function') {
+    return ((...args: any[]) => {
+      return deepAssign(a, b(...args), `${debugPath}(...)`)
+    }) as unknown as A & B
+  } else if (a === undefined || a === null) {
+    return b as A & B
+  } else if (b === undefined || b === null) {
+    return a as A & B
+  } else {
+    return a as A & B
+  }
+}
+
+/**
+ * Merges. To merge functions, applies both of them and then deep merges the result.
+ * This *does not* mutate `a`
+ */
 export function deepMerge<A, B> (a: A, b: B, debugPath = ''): A & B {
   if ((a as any) === (b as any)) {
     return a as A & B
